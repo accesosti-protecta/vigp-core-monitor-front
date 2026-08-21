@@ -1,0 +1,7 @@
+{
+  "apiBaseUrl": "/api",
+  "platformReturnUrl": "https://plataformadigital.protectasecurity.pe/",
+  "pageSizeDefault": 12,
+  "featureFlags": {},
+  "devMock": true
+}

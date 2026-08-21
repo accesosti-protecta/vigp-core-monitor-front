@@ -1,0 +1,14 @@
+<header class="hdr">
+  <span class="hdr__brand">Consulta y trazabilidad de EECC</span>
+  <div class="hdr__right">
+    @if (session.displayName(); as name) {
+      <span class="hdr__user">{{ name }}</span>
+    }
+    <!-- Navegacion al sistema de origen, no un logout centralizado. -->
+    <a class="hdr__back" [href]="returnUrl">Volver a Plataforma Digital</a>
+  </div>
+</header>
+
+<main class="main" id="contenido">
+  <router-outlet />
+</main>

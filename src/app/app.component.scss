@@ -1,0 +1,13 @@
+.hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.5rem;
+  background: #05668d;
+  color: #fff;
+}
+.hdr__brand { font-weight: 600; }
+.hdr__right { display: flex; align-items: center; gap: 1.25rem; font-size: 0.875rem; }
+.hdr__back { color: #fff; text-decoration: underline; }
+.main { max-width: 76rem; margin: 0 auto; padding: 1.5rem; }

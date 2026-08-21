@@ -1,0 +1,47 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+.modal {
+  background: #fff;
+  width: min(720px, 96vw);
+  height: min(88vh, 900px);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+.modal__head { padding: 1rem 1.25rem; }
+.modal__title { color: #1e2761; font-weight: 700; letter-spacing: 0.02em; }
+.modal__body { flex: 1; min-height: 0; background: #e9ecef; }
+.frame { width: 100%; height: 100%; border: 0; }
+.mock {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+}
+.mock__title { font-weight: 600; color: #0f172a; margin: 0; }
+.mock__hint { color: #5f6368; margin: 0; max-width: 28rem; }
+.modal__foot { padding: 0.875rem 1.25rem; display: flex; justify-content: flex-end; }
+.btn-cerrar {
+  background: #f97316;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-cerrar:hover { background: #ea6a0a; }

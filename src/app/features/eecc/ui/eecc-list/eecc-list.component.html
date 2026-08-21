@@ -1,0 +1,134 @@
+<div class="head">
+  <h1 tabindex="-1" class="title">Control de Envio de EECC</h1>
+  <!-- Descargar: en el mockup pero fuera del alcance aprobado (propuesta funcional 2.5).
+       Se deja visible e inhabilitado hasta resolver la contradiccion. -->
+  <button type="button" class="btn-descargar" disabled
+          title="Descarga pendiente de definicion de alcance">
+    Descargar
+  </button>
+</div>
+
+<section class="filtros" aria-label="Filtros de busqueda">
+  <div class="campo">
+    <label for="f-poliza">Poliza</label>
+    <input id="f-poliza" type="text" placeholder="N&ordm; poliza"
+           [value]="fPoliza()" (input)="fPoliza.set($any($event.target).value)" />
+  </div>
+
+  <div class="campo">
+    <label for="f-mes">Mes de Cierre</label>
+    <select id="f-mes" [value]="fMes() ?? ''"
+            (change)="fMes.set(+$any($event.target).value || null)">
+      <option value="">Seleccione</option>
+      @for (m of meses; track m.value) {
+        <option [value]="m.value">{{ m.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="campo">
+    <label for="f-anio">Ano de Cierre</label>
+    <select id="f-anio" [value]="fAnio() ?? ''"
+            (change)="fAnio.set(+$any($event.target).value || null)">
+      <option value="">Seleccione</option>
+      @for (a of anios; track a) {
+        <option [value]="a">{{ a }}</option>
+      }
+    </select>
+  </div>
+
+  <button type="button" class="btn-buscar" (click)="buscar()">Buscar</button>
+</section>
+
+<p class="resumen">
+  Total del Registro EECC: {{ store.summary().total }}
+  <span class="leg"><span class="dot dot--ok"></span> Generado Enviado: {{ store.summary().generadoEnviado }}</span>
+  <span class="leg"><span class="dot dot--warn"></span> Generado no envio: {{ store.summary().generadoNoEnviado }}</span>
+  <span class="leg"><span class="dot dot--danger"></span> Pendiente: {{ store.summary().pendiente }}</span>
+</p>
+
+<section aria-live="polite" [attr.aria-busy]="store.isLoading()">
+  @if (store.isLoading()) {
+    <app-skeleton [count]="8" />
+  } @else if (store.isError()) {
+    <div class="alert" role="alert">
+      <p class="alert__msg">{{ store.error()?.message }}</p>
+      @if (store.error()?.correlationId; as ref) {
+        <p class="alert__ref">Codigo de referencia: {{ ref.slice(0, 8) }}</p>
+      }
+    </div>
+  } @else {
+    <table class="tbl">
+      <caption class="sr-only">Estados de cuenta por poliza</caption>
+      <thead>
+        <tr>
+          <th scope="col">Poliza</th>
+          <th scope="col">Nro de documento</th>
+          <th scope="col">Contratante</th>
+          <th scope="col">Asegurado</th>
+          <th scope="col">Periodo de Cierre</th>
+          <th scope="col">Estado Contratante</th>
+          <th scope="col">Estado Asegurado</th>
+          <th scope="col">Fecha de Generacion</th>
+          <th scope="col" class="ta-center">EECC</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of store.rows(); track row.id) {
+          <tr>
+            <td>{{ row.policyNumber }}</td>
+            <td>DNI - {{ row.documentNumber }}</td>
+            <td>{{ row.contratante }}</td>
+            <td>{{ row.asegurado }}</td>
+            <td>{{ row.period }}</td>
+            <td>
+              <span class="estado">
+                <span class="dot" [class]="dotOf(row.contratanteStatus)"></span>
+                {{ labelOf(row.contratanteStatus) }}
+              </span>
+            </td>
+            <td>
+              @if (row.aseguradoStatus; as st) {
+                <span class="estado">
+                  <span class="dot" [class]="dotOf(st)"></span>
+                  {{ labelOf(st) }}
+                </span>
+              }
+            </td>
+            <td>{{ row.generatedAt ? (row.generatedAt | date: 'dd/MM/yyyy') : '-' }}</td>
+            <td class="ta-center">
+              <button type="button" class="lupa" (click)="abrirVisor(row)"
+                      [attr.aria-label]="'Ver EECC de la poliza ' + row.policyNumber">
+                &#128269;
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9">
+              @if (store.isIdle()) {
+                <app-empty-state [heading]="'Realice una busqueda para visualizar resultados'" />
+              } @else {
+                <app-empty-state
+                  [heading]="'Sin resultados'"
+                  [hint]="'No hay EECC que coincidan con los criterios de busqueda.'" />
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (!store.isIdle() && store.total() > 0) {
+      <app-paginator
+        [page]="filter().page"
+        [pageSize]="filter().pageSize"
+        [total]="store.total()"
+        (pageChange)="onPageChange($event)" />
+    }
+  }
+</section>
+
+@if (viewerUrl(); as url) {
+  <app-eecc-pdf-viewer [url]="url" (close)="cerrarVisor()" />
+}
