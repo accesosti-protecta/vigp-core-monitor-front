@@ -1,0 +1,13 @@
+/dist
+/out-tsc
+/tmp
+/node_modules
+/coverage
+/.angular/cache
+/test-results
+/playwright-report
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*

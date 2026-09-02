@@ -1,0 +1,27 @@
+<div class="backdrop" (click)="onBackdrop($event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Visor de documento PDF">
+    <header class="modal__head">
+      <span class="modal__title">VISOR DE DOCUMENTO (.PDF)</span>
+    </header>
+
+    <div class="modal__body">
+      @if (devMock) {
+        <div class="mock">
+          <p class="mock__title">Documento de ejemplo (modo desarrollo)</p>
+          <p class="mock__hint">
+            Sin backend no hay PDF real. En produccion, aqui se incrusta el EECC
+            generado por VIGP Core.
+          </p>
+        </div>
+      } @else if (safeUrl(); as src) {
+        <iframe class="frame" [src]="src" title="Documento EECC"></iframe>
+      } @else {
+        <p class="mock__hint">No hay documento disponible.</p>
+      }
+    </div>
+
+    <footer class="modal__foot">
+      <button type="button" class="btn-cerrar" (click)="close.emit()">Cerrar</button>
+    </footer>
+  </div>
+</div>
