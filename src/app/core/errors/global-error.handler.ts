@@ -17,6 +17,5 @@ export class GlobalErrorHandler implements ErrorHandler {
     const ref = newCorrelationId().slice(0, 8);
     this._lastRef.value = ref;
     // TODO(P-10): enviar a la telemetria corporativa cuando este definida.
-    console.error(`[eecc:${ref}]`, error);
   }
 }

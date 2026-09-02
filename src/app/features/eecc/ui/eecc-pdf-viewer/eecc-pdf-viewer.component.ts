@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, HostListener, inject, input, output } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+// import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SafeResourceUrl } from '@angular/platform-browser';
 import { APP_CONFIG } from '@core/config/app-config.token';
 
 /**
@@ -14,7 +15,7 @@ import { APP_CONFIG } from '@core/config/app-config.token';
   styleUrl: './eecc-pdf-viewer.component.scss',
 })
 export class EeccPdfViewerComponent {
-  private readonly sanitizer = inject(DomSanitizer);
+  //private readonly sanitizer = inject(DomSanitizer);
   protected readonly devMock = inject(APP_CONFIG).devMock ?? false;
 
   /** URL del documento; vacia = sin documento. */
@@ -23,7 +24,7 @@ export class EeccPdfViewerComponent {
 
   protected readonly safeUrl = computed<SafeResourceUrl | null>(() => {
     const u = this.url();
-    return u ? this.sanitizer.bypassSecurityTrustResourceUrl(u) : null;
+    return u //? this.sanitizer.bypassSecurityTrustResourceUrl(u) : null;
   });
 
   protected onBackdrop(event: MouseEvent): void {

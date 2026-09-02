@@ -9,7 +9,6 @@ import { AppError } from './app-error';
  */
 export function toAppError(e: HttpErrorResponse, req: HttpRequest<unknown>): AppError {
   const correlationId = req.context.get(CORRELATION_ID) || undefined;
-
   switch (e.status) {
     case 0:
       return {

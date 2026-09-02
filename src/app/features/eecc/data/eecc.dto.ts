@@ -2,27 +2,27 @@
 export interface EeccRowDto {
   id: string;
   policyNumber: string;
-  documentNumber: string;
-  contratante: string;
-  asegurado: string;
-  closingMonth: number;
-  closingYear: number;
-  contratanteStatus: string;
-  aseguradoStatus: string | null;
-  generatedAt: string | null;
+  contractorDocNumber: string;
+  contractorFullName: string;
+  insuredFullName: string;
+  closingPeriodMonth: number;
+  closingPeriodYear: number;
+  contractorEeccStatus: number;
+  insuredEeccStatus: number | null;
+  generationDate: string | null;
 }
 
 export interface EeccSummaryDto {
-  total: number;
-  generadoEnviado: number;
-  generadoNoEnviado: number;
-  pendiente: number;
+  totalRecords: number;
+  totalGenerated: number;
+  totalGeneratedNotSent: number;
+  totalPending: number;
 }
 
-export interface EeccSearchDto {
-  items: EeccRowDto[];
-  page: number;
-  pageSize: number;
-  total: number;
-  summary: EeccSummaryDto;
+export interface EeccSearchDto extends EeccSummaryDto {
+  data: EeccRowDto[];
+  // page: number;
+  // pageSize: number;
+  // total: number;
+  // summary: EeccSummaryDto;
 }

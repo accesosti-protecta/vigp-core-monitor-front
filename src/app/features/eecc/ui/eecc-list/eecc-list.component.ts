@@ -53,6 +53,8 @@ export class EeccListComponent {
   protected readonly fPoliza = signal('');
   protected readonly fMes = signal<number | null>(null);
   protected readonly fAnio = signal<number | null>(null);
+  protected readonly fAnioError = signal(false);
+  protected readonly fMesError = signal(false);
 
   // URL del documento en el visor; null = modal cerrado.
   protected readonly viewerUrl = signal<string | null>(null);
@@ -68,6 +70,8 @@ export class EeccListComponent {
   }
 
   protected buscar(): void {
+    this.validAnioMes();
+    if(this.fMesError() || this.fAnioError()) return;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -112,6 +116,29 @@ export class EeccListComponent {
         return 'dot--muted';
     }
   }
+
+  protected validAnioMes(): void{
+
+    const mesInvalid = this.fMes() === null;
+    const anioInvalid = this.fAnio() === null;
+
+    this.fMesError.set(mesInvalid);
+    this.fAnioError.set(anioInvalid);
+
+  }
+
+  protected onMesChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.fMes.set(Number(value) || null);
+    this.fMesError.set(false);
+  }
+  
+  protected onAnioChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.fAnio.set(Number(value) || null);
+    this.fAnioError.set(false);
+  }
+
 }
 
 export function parseFilter(pm: ParamMap): EeccFilter {

@@ -23,7 +23,7 @@ export class SessionService {
       this.store.set(MOCK_SESSION);
       return;
     }
-
+    
     const base = this.loader.get().apiBaseUrl;
     const dto = await firstValueFrom(this.http.get<SessionDto>(`${base}/session`));
     this.store.set(toSession(dto));
