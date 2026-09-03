@@ -2,7 +2,7 @@
   <h1 tabindex="-1" class="title">Control de Envio de EECC</h1>
   <!-- Descargar: en el mockup pero fuera del alcance aprobado (propuesta funcional 2.5).
        Se deja visible e inhabilitado hasta resolver la contradiccion. -->
-  <button type="button" class="btn-descargar" disabled
+  <button type="button" class="btn-descargar" [disabled]="!fStateDownload()"
           title="Descarga pendiente de definicion de alcance">
     Descargar
   </button>

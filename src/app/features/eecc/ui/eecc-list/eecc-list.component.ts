@@ -55,6 +55,7 @@ export class EeccListComponent {
   protected readonly fAnio = signal<number | null>(null);
   protected readonly fAnioError = signal(false);
   protected readonly fMesError = signal(false);
+  protected readonly fStateDownload = signal(false);
 
   // URL del documento en el visor; null = modal cerrado.
   protected readonly viewerUrl = signal<string | null>(null);
@@ -66,6 +67,7 @@ export class EeccListComponent {
     // La URL manda: la busqueda dispara la carga. Ver documento de arquitectura 6.2.
     effect(() => {
       void this.store.load(this.filter());
+      this.fStateDownload.set(this.store.total() > 0);
     });
   }
 
