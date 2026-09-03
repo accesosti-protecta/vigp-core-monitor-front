@@ -31,7 +31,7 @@
     <label for="f-anio">Año de Cierre</label>
     <select id="f-anio" [value]="fAnio() ?? ''"
             [class.select-required]="fAnioError()"
-            (change)="fAnio.set(+$any($event.target).value || null)">
+            (change)="onAnioChange($event)">
       <option value="">Seleccione</option>
       @for (a of anios; track a) {
         <option [value]="a">{{ a }}</option>
