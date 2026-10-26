@@ -1,11 +1,23 @@
 <header class="hdr">
-  <span class="hdr__brand">Consulta y trazabilidad de EECC</span>
+  <div class="hdr__left">
+    <img src="images/logo-PS.svg" alt="Protecta Security" class="hdr__logo" />
+  </div>
+
   <div class="hdr__right">
-    @if (session.displayName(); as name) {
-      <span class="hdr__user">{{ name }}</span>
-    }
-    <!-- Navegacion al sistema de origen, no un logout centralizado. -->
-    <a class="hdr__back" [href]="returnUrl">Volver a Plataforma Digital</a>
+    <div class="hdr__user-meta">
+      @if (session.displayName(); as name) {
+      <span class="hdr__user-name">{{ name }}</span>
+      }
+      <!-- Navegacion al sistema de origen -->
+      <a class="hdr__back" [href]="returnUrl">Volver a Plataforma Digital</a>
+    </div>
+
+    <div class="hdr__avatar" aria-hidden="true">
+      <svg class="hdr__avatar-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+      </svg>
+    </div>
   </div>
 </header>
 
