@@ -89,10 +89,6 @@ export class EeccListComponent {
       }
     });
 
-    // Reactive reads from sessionStorage (available after the effect above already ran).
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    this.queryParams(); // touch to keep reactivity graph connected
-
     // La URL manda: la busqueda dispara la carga. Ver documento de arquitectura 6.2.
     effect(() => {
       void this.store.load(this.filter());
