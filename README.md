@@ -176,7 +176,7 @@ despliegue. Un solo artefacto para DES, QAS y PRD.
 
 ```json
 {
-  "apiBaseUrl": "/api",
+  "apiBaseUrlVigpCore": "/api",
   "platformReturnUrl": "https://plataformadigital.protectasecurity.pe/",
   "pageSizeDefault": 50,
   "featureFlags": { "checkpointsTimeline": true }

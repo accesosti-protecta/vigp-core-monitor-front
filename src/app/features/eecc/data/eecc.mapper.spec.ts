@@ -1,17 +1,18 @@
 import { toRow, toSearchResult, toStatus, monthName } from './eecc.mapper';
-import { EeccRowDto, EeccSearchDto } from './eecc.dto';
+import { EeccRowDto } from './eecc.dto';
+import { EeccFilter } from '../domain/eecc-filter';
 
 const dto: EeccRowDto = {
   id: 'e-1',
   policyNumber: '7107004912',
-  documentNumber: '71418265',
-  contratante: 'Bernabe Rios Juan',
-  asegurado: 'Bernabe Rios Juan',
-  closingMonth: 3,
-  closingYear: 2026,
-  contratanteStatus: 'GENERATED_SENT',
-  aseguradoStatus: null,
-  generatedAt: '2026-04-01T09:00:00-05:00',
+  contractorDocNumber: '71418265',
+  contractorFullName: 'Bernabe Rios Juan',
+  insuredFullName: 'Bernabe Rios Juan',
+  closingPeriodMonth: 3,
+  closingPeriodYear: 2026,
+  contractorEeccStatus: 3,
+  insuredEeccStatus: 0,
+  generationDate: '2026-04-01T09:00:00-05:00',
 };
 
 describe('eecc.mapper', () => {
@@ -19,22 +20,22 @@ describe('eecc.mapper', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('mapea los tres estados conocidos', () => {
-    expect(toStatus('GENERATED_SENT')).toBe('GENERADO_ENVIADO');
-    expect(toStatus('GENERATED_NOT_SENT')).toBe('GENERADO_NO_ENVIADO');
-    expect(toStatus('PENDING')).toBe('PENDIENTE');
+    expect(toStatus(3)).toBe('GENERADO_ENVIADO');
+    expect(toStatus(2)).toBe('GENERADO_NO_ENVIADO');
+    expect(toStatus(1)).toBe('PENDIENTE');
   });
 
   it('un estado nuevo cae en DESCONOCIDO, no rompe la tabla', () => {
-    expect(toStatus('SOMETHING_NEW')).toBe('DESCONOCIDO');
+    expect(toStatus(99)).toBe('DESCONOCIDO');
     expect(toStatus(null)).toBe('DESCONOCIDO');
   });
 
-  it('sin estado de asegurado, la columna queda vacia (null)', () => {
+  it('sin estado de asegurado (0), la columna queda vacia (null)', () => {
     expect(toRow(dto).aseguradoStatus).toBeNull();
   });
 
   it('con asegurado distinto, mapea su estado', () => {
-    const r = toRow({ ...dto, asegurado: 'Otro', aseguradoStatus: 'PENDING' });
+    const r = toRow({ ...dto, insuredFullName: 'Otro', insuredEeccStatus: 1 });
     expect(r.aseguradoStatus).toBe('PENDIENTE');
   });
 
@@ -44,7 +45,17 @@ describe('eecc.mapper', () => {
   });
 
   it('normaliza total y summary ausentes', () => {
-    const res = toSearchResult({ items: [dto], page: 1, pageSize: 12 } as unknown as EeccSearchDto);
+    const filter: EeccFilter = { page: 1, pageSize: 12 };
+    const res = toSearchResult(
+      {
+        data: [dto],
+        totalRecords: 0,
+        totalGenerated: 0,
+        totalGeneratedNotSent: 0,
+        totalPending: 0,
+      },
+      filter,
+    );
     expect(res.page.total).toBe(0);
     expect(res.summary.total).toBe(0);
   });

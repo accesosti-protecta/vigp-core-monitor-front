@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SessionStore } from '@core/auth/session.store';
+import { SessionService } from '@core/auth/session.service';
 import { APP_CONFIG } from '@core/config/app-config.token';
 
 @Component({
@@ -12,6 +12,6 @@ import { APP_CONFIG } from '@core/config/app-config.token';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  protected readonly session = inject(SessionStore);
+  protected readonly session = inject(SessionService);
   protected readonly returnUrl = inject(APP_CONFIG).platformReturnUrl;
 }

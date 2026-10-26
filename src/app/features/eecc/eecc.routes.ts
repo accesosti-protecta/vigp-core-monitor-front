@@ -4,6 +4,11 @@ import { EeccStore } from './eecc.store';
 export const EECC_ROUTES: Routes = [
   {
     path: '',
+    pathMatch: 'full',
+    redirectTo: '',
+  },
+  {
+    path: 'eecc-consulta',
     providers: [EeccStore],
     title: 'Control de Envio de EECC',
     loadComponent: () =>
