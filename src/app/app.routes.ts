@@ -1,7 +1,4 @@
 import { Routes } from '@angular/router';
-import { permissionGuard } from '@core/auth/permission.guard';
-import { sessionGuard } from '@core/auth/session.guard';
-import { PERM_EECC_CONSULTA } from '@core/auth/session.model';
 
 export const routes: Routes = [
   // Las rutas de rechazo van ANTES de la ruta vacia: un path '' sin
@@ -22,7 +19,6 @@ export const routes: Routes = [
   },
   {
     path: '',
-    canActivate: [sessionGuard, permissionGuard(PERM_EECC_CONSULTA)],
     loadChildren: () => import('@features/eecc/eecc.routes').then((m) => m.EECC_ROUTES),
   },
   { path: '**', redirectTo: '' },

@@ -1,42 +1,76 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
 import { AppConfigLoader } from '../config/app-config.loader';
-import { MOCK_SESSION } from '../config/dev-mock';
-import { Session, SessionDto } from './session.model';
-import { SessionStore } from './session.store';
+
+const STORAGE_KEY_USER = 'vigp_user_name';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
-  private readonly http = inject(HttpClient);
-  private readonly store = inject(SessionStore);
-  /**
-   * Se inyecta el loader, no APP_CONFIG: el token resuelve leyendo la config
-   * al construir el servicio, y en el arranque este servicio se instancia
-   * antes de que la config exista. Se consulta al usarla, no al construirse.
-   */
   private readonly loader = inject(AppConfigLoader);
+  private readonly _displayName = signal<string>('');
 
-  async bootstrap(): Promise<void> {
-    // SOLO DESARROLLO: sin backend, siembra una sesion falsa. Ver dev-mock.ts.
-    if (this.loader.get().devMock) {
-      this.store.set(MOCK_SESSION);
-      return;
+  readonly displayName = this._displayName.asReadonly();
+
+  init(): void {
+    // 1. Verificar si viene en los query params de la redirección
+    if (typeof window !== 'undefined' && window.location) {
+      const params = new URLSearchParams(window.location.search);
+      const nombre = params.get('nombre');
+      const apellido = params.get('apellido');
+
+      if (nombre || apellido) {
+        const fullName = [nombre, apellido].filter(Boolean).join(' ').trim();
+        this.setUser(fullName);
+        this.cleanUrlParams(['nombre', 'apellido']);
+        return;
+      }
+
+      // 2. Si no viene en la URL, revisar sessionStorage (ej. tras recargar F5 o navegar entre rutas)
+      const stored = sessionStorage.getItem(STORAGE_KEY_USER);
+      if (stored) {
+        this._displayName.set(stored);
+        return;
+      }
     }
-    
-    const base = this.loader.get().apiBaseUrl;
-    const dto = await firstValueFrom(this.http.get<SessionDto>(`${base}/session`));
-    this.store.set(toSession(dto));
+
+    // 3. Fallback en desarrollo si devMock está activo
+    if (this.loader.get().devMock) {
+      this.setUser('Usuario de Desarrollo');
+    }
   }
 
-  markAnonymous(): void {
-    this.store.clear();
+  setUser(name: string): void {
+    this._displayName.set(name);
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      if (name) {
+        sessionStorage.setItem(STORAGE_KEY_USER, name);
+      } else {
+        sessionStorage.removeItem(STORAGE_KEY_USER);
+      }
+    }
   }
-}
 
-export function toSession(dto: SessionDto): Session {
-  return {
-    user: { username: dto.username, displayName: dto.displayName, profile: dto.profile },
-    permissions: Object.freeze([...(dto.permissions ?? [])]),
-  };
+  clear(): void {
+    this._displayName.set('');
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.removeItem(STORAGE_KEY_USER);
+    }
+  }
+
+  private cleanUrlParams(keysToRemove: string[]): void {
+    try {
+      const url = new URL(window.location.href);
+      let changed = false;
+      for (const key of keysToRemove) {
+        if (url.searchParams.has(key)) {
+          url.searchParams.delete(key);
+          changed = true;
+        }
+      }
+      if (changed) {
+        window.history.replaceState({}, document.title, url.pathname + (url.search || '') + url.hash);
+      }
+    } catch {
+      // Ignorar errores en entornos sin soporte de History API
+    }
+  }
 }

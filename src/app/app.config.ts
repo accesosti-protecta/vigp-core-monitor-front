@@ -12,7 +12,6 @@ import {
 import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
 import { SessionService } from '@core/auth/session.service';
 import { AppConfigLoader } from '@core/config/app-config.loader';
-import { isAppError } from '@core/errors/app-error';
 import { GlobalErrorHandler } from '@core/errors/global-error.handler';
 import { correlationIdInterceptor } from '@core/http/correlation-id.interceptor';
 import { credentialsInterceptor } from '@core/http/credentials.interceptor';
@@ -39,8 +38,7 @@ export const appConfig: ApplicationConfig = {
       const router = inject(Router);
 
       return (async () => {
-        // La config va en su propio try: si falla, las pantallas de sesion
-        // expirada y sin permiso tampoco pueden renderizar (inyectan APP_CONFIG).
+        // Si falla la configuracion, la app no puede continuar.
         try {
           await config.load();
         } catch {
@@ -48,17 +46,8 @@ export const appConfig: ApplicationConfig = {
           return;
         }
 
-        try {
-          await session.bootstrap();
-        } catch (e: unknown) {
-          // Sin este catch la app no arranca y el usuario ve pantalla en
-          // blanco. El caso mas probable de todos es un marcador viejo.
-          // El interceptor ya convirtio el error: aca llega un AppError,
-          // no un HttpErrorResponse.
-          session.markAnonymous();
-          const expired = isAppError(e) && e.kind === 'expired';
-          void router.navigateByUrl(expired ? '/sesion-expirada' : '/error-arranque');
-        }
+        // Inicializa usuario desde redireccion URL / sessionStorage / mock
+        session.init();
       })();
     }),
   ],

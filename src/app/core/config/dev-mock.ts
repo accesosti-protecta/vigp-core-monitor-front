@@ -12,16 +12,10 @@
  * model, app-config.json, session.service, eecc.api, eecc-pdf-viewer).
  * ============================================================================
  */
-import { Session, PERM_EECC_CONSULTA } from '../auth/session.model';
 import { EeccFilter } from '../../features/eecc/domain/eecc-filter';
 import { EeccId, EeccRow } from '../../features/eecc/domain/eecc-row.model';
 import { EnvioStatus } from '../../features/eecc/domain/envio-status';
 import { SearchResult } from '../../features/eecc/data/eecc.mapper';
-
-export const MOCK_SESSION: Session = {
-  user: { username: 'dev', displayName: 'Usuario de Desarrollo', profile: 'OPERACIONES' },
-  permissions: Object.freeze([PERM_EECC_CONSULTA]),
-};
 
 const D = new Date('2026-04-01T09:00:00-05:00');
 

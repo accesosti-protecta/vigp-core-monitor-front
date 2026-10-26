@@ -1,7 +1,7 @@
 /** Configuracion resuelta en tiempo de ejecucion (AD-05). */
 export interface AppConfig {
   /** Base de las APIs de VIGP Core. Relativa si SPA y API comparten origen. */
-  readonly apiBaseUrl: string;
+  readonly apiBaseUrlVigpCore: string;
   /** Destino del boton "Volver a Plataforma Digital". */
   readonly platformReturnUrl: string;
   readonly pageSizeDefault: number;

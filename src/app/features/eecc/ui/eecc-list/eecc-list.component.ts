@@ -24,7 +24,7 @@ const MESES: readonly Mes[] = [
   { value: 10, label: 'Octubre' }, { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
 ];
 
-const ANIOS: readonly number[] = [2024, 2025, 2026];
+const ANIOS: readonly number[] = [2023, 2024, 2025, 2026];
 
 @Component({
   selector: 'app-eecc-list',
@@ -55,6 +55,7 @@ export class EeccListComponent {
   protected readonly fAnio = signal<number | null>(null);
   protected readonly fAnioError = signal(false);
   protected readonly fMesError = signal(false);
+  protected readonly fStateDownload = signal(false);
 
   // URL del documento en el visor; null = modal cerrado.
   protected readonly viewerUrl = signal<string | null>(null);
@@ -63,15 +64,41 @@ export class EeccListComponent {
   protected readonly filter = computed(() => parseFilter(this.queryParams()));
 
   constructor() {
+    // Guarda firstname y lastname de la URL en sessionStorage y luego los elimina de la URL.
+    effect(() => {
+      const params = this.queryParams();
+      const firstname = params.get('firstname');
+      const lastname = params.get('lastname');
+
+      if (firstname) sessionStorage.setItem('firstname', firstname);
+      if (lastname) sessionStorage.setItem('lastname', lastname);
+
+      // Si llegaron en la URL, los quitamos sin dejar rastro en el historial.
+      if (firstname || lastname) {
+        const clean: Record<string, string | null> = {};
+        params.keys.forEach((k) => {
+          if (k !== 'firstname' && k !== 'lastname') {
+            clean[k] = params.get(k);
+          }
+        });
+        void this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: clean,
+          replaceUrl: true,
+        });
+      }
+    });
+
     // La URL manda: la busqueda dispara la carga. Ver documento de arquitectura 6.2.
     effect(() => {
       void this.store.load(this.filter());
+      this.fStateDownload.set(this.store.total() > 0);
     });
   }
 
   protected buscar(): void {
     this.validAnioMes();
-    if(this.fMesError() || this.fAnioError()) return;
+    if (this.fMesError() || this.fAnioError()) return;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -117,7 +144,7 @@ export class EeccListComponent {
     }
   }
 
-  protected validAnioMes(): void{
+  protected validAnioMes(): void {
 
     const mesInvalid = this.fMes() === null;
     const anioInvalid = this.fAnio() === null;
@@ -132,7 +159,7 @@ export class EeccListComponent {
     this.fMes.set(Number(value) || null);
     this.fMesError.set(false);
   }
-  
+
   protected onAnioChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.fAnio.set(Number(value) || null);
