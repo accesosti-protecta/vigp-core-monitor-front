@@ -21,5 +21,5 @@ export const routes: Routes = [
     path: '',
     loadChildren: () => import('@features/eecc/eecc.routes').then((m) => m.EECC_ROUTES),
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'sin-permiso' },
 ];

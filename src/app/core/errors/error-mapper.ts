@@ -25,7 +25,7 @@ export function toAppError(e: HttpErrorResponse, req: HttpRequest<unknown>): App
     case 403:
       return { kind: 'forbidden', message: 'No tiene permisos para ver esta informacion.', correlationId };
     case 404:
-      return { kind: 'notfound', message: 'No se encontro el EECC solicitado.', correlationId };
+      return { kind: 'notfound', message: 'No se encontro el recurso solicitado.', correlationId };
     // 502 va aparte del default: lo devuelve el reverse proxy cuando VIGP Core
     // no responde, y el mensaje generico sugeriria culpa del usuario.
     case 502:

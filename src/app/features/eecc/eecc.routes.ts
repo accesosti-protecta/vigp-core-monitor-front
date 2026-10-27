@@ -5,7 +5,7 @@ export const EECC_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: '',
+    redirectTo: 'eecc-consulta',
   },
   {
     path: 'eecc-consulta',
@@ -13,5 +13,9 @@ export const EECC_ROUTES: Routes = [
     title: 'Control de Envio de EECC',
     loadComponent: () =>
       import('./ui/eecc-list/eecc-list.component').then((m) => m.EeccListComponent),
+  },
+  {
+    path: '**',
+    redirectTo: 'sin-permiso',
   },
 ];

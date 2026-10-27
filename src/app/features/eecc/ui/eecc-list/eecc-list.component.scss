@@ -3,12 +3,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  border-bottom: 1px solid #f0f2f4;
 }
 
 .title {
-  font-size: 1.375rem;
-  color: #1e2761;
+  font-size: 1.75rem;
+  color: #553d81;
   margin: 0 0 0.75rem;
+  font-weight: normal;
+
 }
 
 .title:focus-visible {
@@ -17,6 +20,9 @@
 }
 
 .btn-descargar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: #1e2761;
   color: #fff;
   border: 0;
@@ -24,6 +30,12 @@
   padding: 0.5rem 1rem;
   font-weight: 600;
   cursor: pointer;
+
+  &__icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
 }
 
 .btn-descargar:disabled {
@@ -47,7 +59,7 @@
 
 .campo label {
   font-size: 0.8125rem;
-  color: #1e2761;
+  color: #553d81;
 }
 
 .campo input,
@@ -61,7 +73,7 @@
 
 .btn-buscar {
   margin-left: auto;
-  background: #1e2761;
+  background: #553d81;
   color: #fff;
   border: 0;
   border-radius: 6px;
@@ -126,9 +138,10 @@
 .tbl th {
   text-align: left;
   padding: 0.7rem 0.75rem;
-  color: #1e2761;
+  color: #aa9ec0;
   font-weight: 600;
-  border-bottom: 1px solid #dfe3e6;
+  border-top: 1px solid #dfe3e6;
+  border-bottom: 2px solid #dfe3e6;
   white-space: nowrap;
 }
 
