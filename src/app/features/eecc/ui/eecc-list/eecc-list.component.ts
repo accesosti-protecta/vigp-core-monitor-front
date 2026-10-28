@@ -183,3 +183,6 @@ export function parseFilter(pm: ParamMap): EeccFilter {
     ...(year > 0 ? { closingYear: year } : {}),
   };
 }
+
+
+// Prueba de accesos
