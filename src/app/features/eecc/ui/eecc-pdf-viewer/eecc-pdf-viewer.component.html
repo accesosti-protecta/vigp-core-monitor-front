@@ -4,20 +4,62 @@
       <span class="modal__title">VISOR DE DOCUMENTO (.PDF)</span>
     </header>
 
-    <div class="modal__body">
-      @if (devMock) {
-        <div class="mock">
-          <p class="mock__title">Documento de ejemplo (modo desarrollo)</p>
-          <p class="mock__hint">
-            Sin backend no hay PDF real. En produccion, aqui se incrusta el EECC
-            generado por VIGP Core.
-          </p>
-        </div>
-      } @else if (safeUrl(); as src) {
-        <iframe class="frame" [src]="src" title="Documento EECC"></iframe>
-      } @else {
-        <p class="mock__hint">No hay documento disponible.</p>
-      }
+    <!-- Solo lectura: sin opciones de descarga ni impresion (CA04 / CA05). -->
+    <div class="toolbar" role="toolbar" aria-label="Controles del visor">
+      <div class="toolbar__group">
+        <button type="button" class="tb-btn" (click)="toggleSidebar()" [class.tb-btn--on]="sidebarOpen()"
+                [attr.aria-pressed]="sidebarOpen()" aria-label="Mostrar u ocultar miniaturas" title="Miniaturas">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" /></svg>
+        </button>
+        <span class="toolbar__sep" aria-hidden="true"></span>
+        <button type="button" class="tb-btn" (click)="first()" [disabled]="isFirst()"
+                aria-label="Primera pagina" title="Primera pagina">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M12 3 7 8l5 5" /></svg>
+        </button>
+        <button type="button" class="tb-btn" (click)="prev()" [disabled]="isFirst()"
+                aria-label="Pagina anterior" title="Pagina anterior">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+        </button>
+        <input class="toolbar__page" type="text" inputmode="numeric" aria-label="Pagina actual"
+               [value]="currentPage()" [disabled]="pageCount() === 0"
+               (keydown.enter)="onPageInput($event)" (blur)="onPageInput($event)" />
+        <span class="toolbar__of">de {{ pageCount() }}</span>
+        <button type="button" class="tb-btn" (click)="next()" [disabled]="isLast()"
+                aria-label="Pagina siguiente" title="Pagina siguiente">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+        </button>
+        <button type="button" class="tb-btn" (click)="last()" [disabled]="isLast()"
+                aria-label="Ultima pagina" title="Ultima pagina">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M4 3l5 5-5 5" /></svg>
+        </button>
+      </div>
+
+      <div class="toolbar__group">
+        <button type="button" class="tb-btn" (click)="zoomOut()" [disabled]="!canZoomOut()"
+                aria-label="Reducir zoom" title="Reducir zoom">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg>
+        </button>
+        <span class="toolbar__zoom" aria-live="polite">{{ zoomLabel() }}</span>
+        <button type="button" class="tb-btn" (click)="zoomIn()" [disabled]="!canZoomIn()"
+                aria-label="Aumentar zoom" title="Aumentar zoom">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M8 3v10" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal__body" (contextmenu)="blockContextMenu($event)">
+      <aside class="sidebar" [hidden]="!sidebarOpen()" aria-label="Miniaturas de paginas">
+        <div #thumbs></div>
+      </aside>
+
+      <div #scroll class="viewport" (scroll)="onScroll()">
+        @if (status() === 'loading') {
+          <p class="msg">Cargando documento...</p>
+        } @else if (status() === 'error') {
+          <p class="msg msg--error" role="alert">No se pudo mostrar el documento.</p>
+        }
+        <div #pages [hidden]="status() === 'error'"></div>
+      </div>
     </div>
 
     <footer class="modal__foot">

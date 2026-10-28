@@ -1,10 +1,9 @@
 import { toRow, toSearchResult, toStatus, monthName } from './eecc.mapper';
-import { EeccRowDto } from './eecc.dto';
-import { EeccFilter } from '../domain/eecc-filter';
+import { EeccRowDto, EeccSearchDto } from './eecc.dto';
+import { hasDocument } from '../domain/eecc-row.model';
 
 const dto: EeccRowDto = {
-  id: 'e-1',
-  policyNumber: '7107004912',
+  policyNumber: 7107004912,
   contractorDocNumber: '71418265',
   contractorFullName: 'Bernabe Rios Juan',
   insuredFullName: 'Bernabe Rios Juan',
@@ -16,9 +15,6 @@ const dto: EeccRowDto = {
 };
 
 describe('eecc.mapper', () => {
-  beforeEach(() => jest.spyOn(console, 'warn').mockImplementation(() => undefined));
-  afterEach(() => jest.restoreAllMocks());
-
   it('mapea los tres estados conocidos', () => {
     expect(toStatus(3)).toBe('GENERADO_ENVIADO');
     expect(toStatus(2)).toBe('GENERADO_NO_ENVIADO');
@@ -30,7 +26,7 @@ describe('eecc.mapper', () => {
     expect(toStatus(null)).toBe('DESCONOCIDO');
   });
 
-  it('sin estado de asegurado (0), la columna queda vacia (null)', () => {
+  it('sin estado de asegurado, la columna queda vacia (null)', () => {
     expect(toRow(dto).aseguradoStatus).toBeNull();
   });
 
@@ -44,18 +40,23 @@ describe('eecc.mapper', () => {
     expect(monthName(12)).toBe('Diciembre');
   });
 
+  it('identifica la fila por poliza y periodo, que es lo que pide el visor', () => {
+    const r = toRow(dto);
+    expect(r.id).toBe('7107004912-2026-3');
+    expect(r.policyNumber).toBe('7107004912');
+    expect(r.closingYear).toBe(2026);
+    expect(r.closingMonth).toBe(3);
+  });
+
+  it('solo hay documento (lupa) cuando el EECC esta generado', () => {
+    expect(hasDocument(toRow({ ...dto, contractorEeccStatus: 3 }))).toBe(true);
+    expect(hasDocument(toRow({ ...dto, contractorEeccStatus: 2 }))).toBe(true);
+    expect(hasDocument(toRow({ ...dto, contractorEeccStatus: 1 }))).toBe(false);
+    expect(hasDocument(toRow({ ...dto, contractorEeccStatus: 1, insuredEeccStatus: 2 }))).toBe(true);
+  });
+
   it('normaliza total y summary ausentes', () => {
-    const filter: EeccFilter = { page: 1, pageSize: 12 };
-    const res = toSearchResult(
-      {
-        data: [dto],
-        totalRecords: 0,
-        totalGenerated: 0,
-        totalGeneratedNotSent: 0,
-        totalPending: 0,
-      },
-      filter,
-    );
+    const res = toSearchResult({ data: [dto] } as unknown as EeccSearchDto, { page: 1, pageSize: 12 });
     expect(res.page.total).toBe(0);
     expect(res.summary.total).toBe(0);
   });

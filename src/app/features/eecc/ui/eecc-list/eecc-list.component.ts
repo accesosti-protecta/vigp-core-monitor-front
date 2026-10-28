@@ -8,7 +8,8 @@ import { SkeletonComponent } from '@shared/ui/skeleton/skeleton.component';
 import { EeccApi } from '../../data/eecc.api';
 import { DEFAULT_PAGE_SIZE, EeccFilter } from '../../domain/eecc-filter';
 import { ENVIO_STATUS_LABEL, EnvioStatus } from '../../domain/envio-status';
-import { EeccRow } from '../../domain/eecc-row.model';
+import { EeccId, EeccRow, hasDocument } from '../../domain/eecc-row.model';
+import { isAppError } from '@core/errors/app-error';
 import { EeccStore } from '../../eecc.store';
 import { EeccPdfViewerComponent } from '../eecc-pdf-viewer/eecc-pdf-viewer.component';
 
@@ -47,6 +48,7 @@ export class EeccListComponent {
   protected readonly store = inject(EeccStore);
 
   protected readonly meses = MESES;
+  protected readonly hasDocument = hasDocument;
   protected readonly anios = ANIOS;
 
   // Estado del formulario de filtros (controles nativos, sin @angular/forms).
@@ -57,8 +59,12 @@ export class EeccListComponent {
   protected readonly fMesError = signal(false);
   protected readonly fStateDownload = signal(false);
 
-  // URL del documento en el visor; null = modal cerrado.
-  protected readonly viewerUrl = signal<string | null>(null);
+  // PDF abierto en el visor; null = modal cerrado.
+  protected readonly viewerDoc = signal<ArrayBuffer | null>(null);
+  // Fila cuyo documento se esta consultando (deshabilita su lupa).
+  protected readonly loadingDocId = signal<EeccId | null>(null);
+  // Mensaje informativo cuando el EECC no esta disponible (CA07).
+  protected readonly docNotice = signal<string | null>(null);
 
   private readonly queryParams = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly filter = computed(() => parseFilter(this.queryParams()));
@@ -99,6 +105,7 @@ export class EeccListComponent {
   protected buscar(): void {
     this.validAnioMes();
     if (this.fMesError() || this.fAnioError()) return;
+    this.docNotice.set(null);
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -118,12 +125,31 @@ export class EeccListComponent {
     });
   }
 
-  protected abrirVisor(row: EeccRow): void {
-    this.viewerUrl.set(this.api.documentUrl(row.id));
+  /** Solo abre el modal con el documento ya obtenido: nunca un visor vacio (CA07). */
+  protected async abrirVisor(row: EeccRow): Promise<void> {
+    if (this.loadingDocId()) return;
+    this.docNotice.set(null);
+    this.loadingDocId.set(row.id);
+    try {
+      this.viewerDoc.set(await this.api.getDocument(row));
+    } catch (e: unknown) {
+      this.docNotice.set(
+        isAppError(e) && e.kind !== 'notfound'
+          ? e.message
+          : `El EECC de la poliza ${row.policyNumber} (${row.period}) no se encuentra disponible para su visualizacion.`,
+      );
+    } finally {
+      this.loadingDocId.set(null);
+    }
   }
 
+  /** Cierra el modal; la grilla y la busqueda (en la URL) se mantienen (CA06). */
   protected cerrarVisor(): void {
-    this.viewerUrl.set(null);
+    this.viewerDoc.set(null);
+  }
+
+  protected cerrarAviso(): void {
+    this.docNotice.set(null);
   }
 
   protected labelOf(s: EnvioStatus): string {

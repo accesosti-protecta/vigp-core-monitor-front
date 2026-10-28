@@ -1,4 +1,4 @@
-import { EnvioStatus } from './envio-status';
+import { EnvioStatus, isGenerado } from './envio-status';
 
 export type EeccId = string & { readonly __brand: 'EeccId' };
 
@@ -14,7 +14,14 @@ export interface EeccRow {
   readonly contratante: string;
   readonly asegurado: string;
   readonly period: string; // "Marzo 2026"
+  readonly closingMonth: number;
+  readonly closingYear: number;
   readonly contratanteStatus: EnvioStatus;
   readonly aseguradoStatus: EnvioStatus | null;
   readonly generatedAt: Date | null;
+}
+
+/** El EECC es por poliza: hay documento si alguna de las partes lo tiene generado (CA9). */
+export function hasDocument(row: EeccRow): boolean {
+  return isGenerado(row.contratanteStatus) || isGenerado(row.aseguradoStatus);
 }

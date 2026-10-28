@@ -11,3 +11,6 @@ Thumbs.db
 *.log
 .env
 .env.*
+
+# Worker de pdf.js: lo genera scripts/copy-pdf-worker.mjs en postinstall
+/src/assets/pdfjs/

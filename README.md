@@ -172,21 +172,30 @@ y `eecc.api.ts` (una linea cada una).
 ## Configuracion por ambiente
 
 `src/assets/config/app-config.json` se carga en runtime y se reemplaza en el
-despliegue. Un solo artefacto para DES, QAS y PRD.
+despliegue por la plantilla del ambiente (`deploy/config/app-config.{qas,prd}.json`).
+Un solo artefacto para DES, QAS y PRD. Detalle y reglas de cada campo en
+[`deploy/config/README.md`](deploy/config/README.md).
 
 ```json
 {
   "apiBaseUrlVigpCore": "/api",
   "platformReturnUrl": "https://plataformadigital.protectasecurity.pe/",
-  "pageSizeDefault": 50,
-  "featureFlags": { "checkpointsTimeline": true }
+  "pageSizeDefault": 12,
+  "featureFlags": {}
 }
 ```
 
-**Ese archivo no puede cachearse.** No lleva hash en el nombre, asi que el
-servidor web debe emitir `Cache-Control: no-store` para el.
+- **Se valida al arrancar** (`parseAppConfig`): si falta un campo o es invalido,
+  la app va a `/error-arranque` en vez de fallar en la primera llamada al API.
+- **No puede cachearse.** No lleva hash en el nombre, asi que el servidor web
+  debe emitir `Cache-Control: no-store` para el.
+- **Desarrollo local:** `apiBaseUrlVigpCore` es `/api` y `ng serve` (o `npm start`) la
+  redirige al API local con `proxy.conf.json` (`https://localhost:7126`). Mismo
+  origen, sin CORS.
 
-`src/environments/` queda solo con `production: true|false`.
+`src/environments/` queda solo con `production: true|false`. El build de
+produccion lo reemplaza con `fileReplacements` (angular.json); sin eso
+`environment.production` seria siempre `false` y no se neutralizaria `devMock`.
 
 ---
 

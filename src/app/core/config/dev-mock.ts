@@ -9,13 +9,14 @@
  * NUNCA debe quedar activo en QAS ni PRD. app-config.loader.ts fuerza
  * devMock:false en builds de produccion.
  * Para eliminarlo: borrar este archivo y las referencias a devMock (config
- * model, app-config.json, session.service, eecc.api, eecc-pdf-viewer).
+ * model, app-config.json, session.service, eecc.api).
  * ============================================================================
  */
 import { EeccFilter } from '../../features/eecc/domain/eecc-filter';
 import { EeccId, EeccRow } from '../../features/eecc/domain/eecc-row.model';
 import { EnvioStatus } from '../../features/eecc/domain/envio-status';
 import { SearchResult } from '../../features/eecc/data/eecc.mapper';
+import { AppError } from '../errors/app-error';
 
 const D = new Date('2026-04-01T09:00:00-05:00');
 
@@ -56,9 +57,24 @@ export function mockSearch(filter: EeccFilter): Promise<SearchResult> {
   });
 }
 
-export function mockDocumentUrl(id: string): string {
-  // Sin PDF real: el visor detecta devMock y muestra un panel de marcador.
-  return `about:blank#${id}`;
+/** PDF minimo de una pagina; las filas PENDIENTE simulan "documento no disponible". */
+export function mockDocument(row: EeccRow): Promise<ArrayBuffer> {
+  if (row.contratanteStatus === 'PENDIENTE') {
+    const notFound: AppError = { kind: 'notfound', message: 'No se encontro el EECC solicitado.' };
+    return Promise.reject(notFound);
+  }
+  const text = `EECC de ejemplo - Poliza ${row.policyNumber} - ${row.period}`;
+  const stream = `BT /F1 14 Tf 72 720 Td (${text}) Tj ET`;
+  const pdf =
+    '%PDF-1.4\n' +
+    '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n' +
+    '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n' +
+    '3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R' +
+    '/Resources<</Font<</F1 5 0 R>>>>>>endobj\n' +
+    `4 0 obj<</Length ${stream.length}>>stream\n${stream}\nendstream endobj\n` +
+    '5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n' +
+    'trailer<</Root 1 0 R>>\n%%EOF';
+  return Promise.resolve(new TextEncoder().encode(pdf).buffer as ArrayBuffer);
 }
 
 function row(
@@ -78,6 +94,8 @@ function row(
     contratante,
     asegurado,
     period: 'Marzo 2026',
+    closingMonth: 3,
+    closingYear: 2026,
     contratanteStatus,
     aseguradoStatus,
     generatedAt: gen,

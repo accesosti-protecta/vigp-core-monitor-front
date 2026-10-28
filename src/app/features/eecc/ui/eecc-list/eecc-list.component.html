@@ -49,6 +49,13 @@
   <span class="leg"><span class="dot dot--danger"></span> Pendiente: {{ store.summary().pendiente }}</span>
 </p>
 
+@if (docNotice(); as notice) {
+<div class="notice" role="status">
+  <p class="notice__msg">{{ notice }}</p>
+  <button type="button" class="notice__close" (click)="cerrarAviso()" aria-label="Cerrar mensaje">&times;</button>
+</div>
+}
+
 <section aria-live="polite" [attr.aria-busy]="store.isLoading()">
   @if (store.isLoading()) {
   <app-skeleton [count]="8" />
@@ -99,10 +106,21 @@
         </td>
         <td>{{ row.generatedAt ? (row.generatedAt | date: 'dd/MM/yyyy') : '-' }}</td>
         <td class="ta-center">
-          <button type="button" class="lupa" (click)="abrirVisor(row)"
-            [attr.aria-label]="'Ver EECC de la poliza ' + row.policyNumber">
-            &#128269;
+          <!-- Lupa solo si el EECC ya fue generado (CA9). -->
+          @if (hasDocument(row)) {
+          <button type="button" class="lupa" (click)="abrirVisor(row)" [disabled]="loadingDocId() !== null"
+            [attr.aria-busy]="loadingDocId() === row.id"
+            [attr.aria-label]="'Ver EECC de la poliza ' + row.policyNumber + ' - ' + row.period">
+            @if (loadingDocId() === row.id) {
+            <span class="lupa__spinner" aria-hidden="true"></span>
+            } @else {
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            }
           </button>
+          }
         </td>
       </tr>
       } @empty {
@@ -127,6 +145,6 @@
   }
 </section>
 
-@if (viewerUrl(); as url) {
-<app-eecc-pdf-viewer [url]="url" (close)="cerrarVisor()" />
+@if (viewerDoc(); as doc) {
+<app-eecc-pdf-viewer [data]="doc" (close)="cerrarVisor()" />
 }

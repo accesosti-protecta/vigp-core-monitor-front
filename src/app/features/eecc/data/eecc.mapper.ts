@@ -34,13 +34,17 @@ function parseDate(raw: string | null): Date | null {
 }
 
 export function toRow(dto: EeccRowDto): EeccRow {
+  const policyNumber = String(dto.policyNumber);
   return {
-    id: dto.id as EeccId,
-    policyNumber: dto.policyNumber,
+    // El backend no envia id: una fila = poliza + periodo de cierre.
+    id: `${policyNumber}-${dto.closingPeriodYear}-${dto.closingPeriodMonth}` as EeccId,
+    policyNumber,
     documentNumber: dto.contractorDocNumber,
     contratante: dto.contractorFullName,
     asegurado: dto.insuredFullName,
     period: `${monthName(dto.closingPeriodMonth)} ${dto.closingPeriodYear}`,
+    closingMonth: dto.closingPeriodMonth,
+    closingYear: dto.closingPeriodYear,
     contratanteStatus: toStatus(dto.contractorEeccStatus),
     // null cuando asegurado === contratante: la columna queda vacia.
     aseguradoStatus: dto.insuredEeccStatus === 0 ? null : toStatus(dto.insuredEeccStatus),

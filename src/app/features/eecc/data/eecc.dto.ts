@@ -1,7 +1,6 @@
 /** Forma que devuelve VIGP Core. Contratos por confirmar (P-01). */
 export interface EeccRowDto {
-  id: string;
-  policyNumber: string;
+  policyNumber: string | number;
   contractorDocNumber: string;
   contractorFullName: string;
   insuredFullName: string;
@@ -17,6 +16,19 @@ export interface EeccSummaryDto {
   totalGenerated: number;
   totalGeneratedNotSent: number;
   totalPending: number;
+}
+
+/** Respuesta de GetMonitoringEeccDocument (formato de document/download-account-statement). */
+export interface EeccDocumentDto {
+  success: boolean;
+  message?: string;
+  policyNumber: number;
+  period: { year: number; month: number };
+  document: {
+    contentType: string;
+    fileSize: number;
+    base64Content: string;
+  } | null;
 }
 
 export interface EeccSearchDto extends EeccSummaryDto {
