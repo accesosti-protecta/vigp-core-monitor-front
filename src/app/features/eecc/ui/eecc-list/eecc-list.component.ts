@@ -6,26 +6,14 @@ import { EmptyStateComponent } from '@shared/ui/empty-state/empty-state.componen
 import { PaginatorComponent } from '@shared/ui/paginator/paginator.component';
 import { SkeletonComponent } from '@shared/ui/skeleton/skeleton.component';
 import { EeccApi } from '../../data/eecc.api';
+import { fallbackPeriods } from '../../data/eecc.mapper';
 import { DEFAULT_PAGE_SIZE, EeccFilter } from '../../domain/eecc-filter';
+import { EeccPeriods, emptyPeriods } from '../../domain/eecc-periods';
 import { ENVIO_STATUS_LABEL, EnvioStatus } from '../../domain/envio-status';
 import { EeccId, EeccRow, hasDocument } from '../../domain/eecc-row.model';
 import { isAppError } from '@core/errors/app-error';
 import { EeccStore } from '../../eecc.store';
 import { EeccPdfViewerComponent } from '../eecc-pdf-viewer/eecc-pdf-viewer.component';
-
-interface Mes {
-  readonly value: number;
-  readonly label: string;
-}
-
-const MESES: readonly Mes[] = [
-  { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' }, { value: 3, label: 'Marzo' },
-  { value: 4, label: 'Abril' }, { value: 5, label: 'Mayo' }, { value: 6, label: 'Junio' },
-  { value: 7, label: 'Julio' }, { value: 8, label: 'Agosto' }, { value: 9, label: 'Septiembre' },
-  { value: 10, label: 'Octubre' }, { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
-];
-
-const ANIOS: readonly number[] = [2023, 2024, 2025, 2026];
 
 @Component({
   selector: 'app-eecc-list',
@@ -47,9 +35,12 @@ export class EeccListComponent {
   private readonly api = inject(EeccApi);
   protected readonly store = inject(EeccStore);
 
-  protected readonly meses = MESES;
   protected readonly hasDocument = hasDocument;
-  protected readonly anios = ANIOS;
+
+  // Opciones de Año y Mes de Cierre: vienen del API (años desde la primera poliza VIGP).
+  private readonly periods = signal<EeccPeriods>(emptyPeriods);
+  protected readonly meses = computed(() => this.periods().months);
+  protected readonly anios = computed(() => this.periods().years);
 
   // Estado del formulario de filtros (controles nativos, sin @angular/forms).
   protected readonly fPoliza = signal('');
@@ -70,6 +61,13 @@ export class EeccListComponent {
   protected readonly filter = computed(() => parseFilter(this.queryParams()));
 
   constructor() {
+    // Los filtros arrancan con la busqueda de la URL (recarga, volver atras, enlace compartido).
+    const initial = this.filter();
+    this.fPoliza.set(initial.policyNumber ?? '');
+    this.fMes.set(initial.closingMonth ?? null);
+    this.fAnio.set(initial.closingYear ?? null);
+    void this.loadPeriods();
+
     // Guarda firstname y lastname de la URL en sessionStorage y luego los elimina de la URL.
     effect(() => {
       const params = this.queryParams();
@@ -100,6 +98,16 @@ export class EeccListComponent {
       void this.store.load(this.filter());
       this.fStateDownload.set(this.store.total() > 0);
     });
+  }
+
+  /** Si el API falla se usa el año actual y los 12 meses, para no bloquear la busqueda. */
+  private async loadPeriods(): Promise<void> {
+    try {
+      this.periods.set(await this.api.getPeriods());
+    } catch {
+      this.periods.set(fallbackPeriods(new Date().getFullYear()));
+      this.docNotice.set('No se pudieron cargar los periodos disponibles; se muestra solo el año actual.');
+    }
   }
 
   protected buscar(): void {

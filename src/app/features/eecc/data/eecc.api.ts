@@ -5,8 +5,9 @@ import { APP_CONFIG } from '@core/config/app-config.token';
 import { EeccFilter } from '../domain/eecc-filter';
 import { EeccRow } from '../domain/eecc-row.model';
 import { AppError } from '@core/errors/app-error';
-import { EeccDocumentDto, EeccSearchDto } from './eecc.dto';
-import { SearchResult, toSearchResult } from './eecc.mapper';
+import { EeccPeriods } from '../domain/eecc-periods';
+import { EeccDocumentDto, EeccPeriodsDto, EeccSearchDto } from './eecc.dto';
+import { SearchResult, toPeriods, toSearchResult } from './eecc.mapper';
 
 /** Frontera con el backend. Sin logica de negocio y sin conocer el Router. */
 @Injectable({ providedIn: 'root' })
@@ -15,6 +16,7 @@ export class EeccApi {
   private readonly config = inject(APP_CONFIG);
   private readonly base = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/GetMonitoringEeccData`;
   private readonly documentUrl = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/GetMonitoringEeccDocument`;
+  private readonly periodsUrl = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/GetMonitoringEeccPeriods`;
 
   async search(filter: EeccFilter): Promise<SearchResult> {
     // SOLO DESARROLLO: datos falsos sin backend. Ver dev-mock.ts.
@@ -30,6 +32,12 @@ export class EeccApi {
     const dto = await firstValueFrom(this.http.get<EeccSearchDto>(this.base, { params }));
     return toSearchResult(dto, filter);
 
+  }
+
+  /** Opciones de los filtros Año y Mes de Cierre (años desde la primera poliza VIGP). */
+  async getPeriods(): Promise<EeccPeriods> {
+    const dto = await firstValueFrom(this.http.get<EeccPeriodsDto>(this.periodsUrl));
+    return toPeriods(dto);
   }
 
   /**

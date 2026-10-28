@@ -20,20 +20,21 @@
 
   <div class="campo">
     <label for="f-mes">Mes de Cierre</label>
-    <select id="f-mes" [value]="fMes() ?? ''" [class.select-required]="fMesError()" (change)="onMesChange($event)">
-      <option value="">Seleccione</option>
-      @for (m of meses; track m.value) {
-      <option [value]="m.value">{{ m.label }}</option>
+    <!-- [selected] por opcion: las opciones llegan del API despues del primer render. -->
+    <select id="f-mes" [class.select-required]="fMesError()" (change)="onMesChange($event)">
+      <option value="" [selected]="fMes() === null">Seleccione</option>
+      @for (m of meses(); track m.value) {
+      <option [value]="m.value" [selected]="m.value === fMes()">{{ m.label }}</option>
       }
     </select>
   </div>
 
   <div class="campo">
     <label for="f-anio">Año de Cierre</label>
-    <select id="f-anio" [value]="fAnio() ?? ''" [class.select-required]="fAnioError()" (change)="onAnioChange($event)">
-      <option value="">Seleccione</option>
-      @for (a of anios; track a) {
-      <option [value]="a">{{ a }}</option>
+    <select id="f-anio" [class.select-required]="fAnioError()" (change)="onAnioChange($event)">
+      <option value="" [selected]="fAnio() === null">Seleccione</option>
+      @for (a of anios(); track a) {
+      <option [value]="a" [selected]="a === fAnio()">{{ a }}</option>
       }
     </select>
   </div>

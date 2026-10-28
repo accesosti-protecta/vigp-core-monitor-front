@@ -31,6 +31,12 @@ export interface EeccDocumentDto {
   } | null;
 }
 
+/** Respuesta de GetMonitoringEeccPeriods: opciones de los filtros de periodo. */
+export interface EeccPeriodsDto {
+  years: number[];
+  months: { value: number; label: string }[];
+}
+
 export interface EeccSearchDto extends EeccSummaryDto {
   data: EeccRowDto[];
   // page: number;

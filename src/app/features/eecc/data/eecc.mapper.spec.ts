@@ -1,4 +1,4 @@
-import { toRow, toSearchResult, toStatus, monthName } from './eecc.mapper';
+import { toRow, toSearchResult, toStatus, monthName, toPeriods, fallbackPeriods } from './eecc.mapper';
 import { EeccRowDto, EeccSearchDto } from './eecc.dto';
 import { hasDocument } from '../domain/eecc-row.model';
 
@@ -59,5 +59,23 @@ describe('eecc.mapper', () => {
     const res = toSearchResult({ data: [dto] } as unknown as EeccSearchDto, { page: 1, pageSize: 12 });
     expect(res.page.total).toBe(0);
     expect(res.summary.total).toBe(0);
+  });
+
+  it('periodos: años ascendentes y meses tal como vienen del API', () => {
+    const p = toPeriods({ years: [2026, 2024, 2025], months: [{ value: 1, label: 'Enero' }] });
+    expect(p.years).toEqual([2024, 2025, 2026]);
+    expect(p.months).toEqual([{ value: 1, label: 'Enero' }]);
+  });
+
+  it('periodos: respuesta vacia no rompe los filtros', () => {
+    expect(toPeriods({} as never)).toEqual({ years: [], months: [] });
+  });
+
+  it('periodos de respaldo: solo el año actual y los 12 meses', () => {
+    const p = fallbackPeriods(2026);
+    expect(p.years).toEqual([2026]);
+    expect(p.months).toHaveLength(12);
+    expect(p.months[0]).toEqual({ value: 1, label: 'Enero' });
+    expect(p.months[11]).toEqual({ value: 12, label: 'Diciembre' });
   });
 });

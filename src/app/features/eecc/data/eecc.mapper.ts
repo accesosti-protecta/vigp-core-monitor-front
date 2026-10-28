@@ -2,7 +2,8 @@ import { EnvioStatus } from '../domain/envio-status';
 import { EeccId, EeccRow } from '../domain/eecc-row.model';
 import { EeccSummary, emptySummary } from '../domain/eecc-summary';
 import { Page } from '../domain/page.model';
-import { EeccRowDto, EeccSearchDto, EeccSummaryDto } from './eecc.dto';
+import { EeccPeriodsDto, EeccRowDto, EeccSearchDto, EeccSummaryDto } from './eecc.dto';
+import { EeccPeriods } from '../domain/eecc-periods';
 import { EeccFilter } from '../domain/eecc-filter';
 
 const MESES = [
@@ -81,5 +82,20 @@ export function toSearchResult(dto: EeccSearchDto, filter: EeccFilter): SearchRe
       totalGeneratedNotSent: dto.totalGeneratedNotSent,
       totalPending: dto.totalPending,
     }) : emptySummary,
+  };
+}
+
+export function toPeriods(dto: EeccPeriodsDto): EeccPeriods {
+  return {
+    years: [...(dto?.years ?? [])].sort((a, b) => a - b),
+    months: (dto?.months ?? []).map((m) => ({ value: m.value, label: m.label })),
+  };
+}
+
+/** Si el API de periodos falla: solo el año actual y los 12 meses, para no bloquear la busqueda. */
+export function fallbackPeriods(currentYear: number): EeccPeriods {
+  return {
+    years: [currentYear],
+    months: MESES.map((label, i) => ({ value: i + 1, label })),
   };
 }
