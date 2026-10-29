@@ -271,3 +271,26 @@
 .select-required {
   border: 1px solid #dc3545 !important;
 }
+
+.campo-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #dc3545;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.campo-error__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: #dc3545;
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+}

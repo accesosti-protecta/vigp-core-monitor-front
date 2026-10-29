@@ -26,22 +26,36 @@
   <div class="campo">
     <label for="f-mes">Mes de Cierre</label>
     <!-- [selected] por opcion: las opciones llegan del API despues del primer render. -->
-    <select id="f-mes" [class.select-required]="fMesError()" (change)="onMesChange($event)">
+    <select id="f-mes" [class.select-required]="fMesError()" [attr.aria-invalid]="fMesError()"
+      [attr.aria-describedby]="fMesError() ? 'f-mes-error' : null" (change)="onMesChange($event)">
       <option value="" [selected]="fMes() === null">Seleccione</option>
       @for (m of meses(); track m.value) {
       <option [value]="m.value" [selected]="m.value === fMes()">{{ m.label }}</option>
       }
     </select>
+    @if (fMesError()) {
+    <span id="f-mes-error" class="campo-error" role="alert">
+      <span class="campo-error__icon" aria-hidden="true">!</span>
+      Campo Obligatorio
+    </span>
+    }
   </div>
 
   <div class="campo">
     <label for="f-anio">Año de Cierre</label>
-    <select id="f-anio" [class.select-required]="fAnioError()" (change)="onAnioChange($event)">
+    <select id="f-anio" [class.select-required]="fAnioError()" [attr.aria-invalid]="fAnioError()"
+      [attr.aria-describedby]="fAnioError() ? 'f-anio-error' : null" (change)="onAnioChange($event)">
       <option value="" [selected]="fAnio() === null">Seleccione</option>
       @for (a of anios(); track a) {
       <option [value]="a" [selected]="a === fAnio()">{{ a }}</option>
       }
     </select>
+    @if (fAnioError()) {
+    <span id="f-anio-error" class="campo-error" role="alert">
+      <span class="campo-error__icon" aria-hidden="true">!</span>
+      Campo Obligatorio
+    </span>
+    }
   </div>
 
   <button type="button" class="btn-buscar" (click)="buscar()">Buscar</button>
