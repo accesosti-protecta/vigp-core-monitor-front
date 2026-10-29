@@ -48,7 +48,6 @@ export class EeccListComponent {
   protected readonly fAnio = signal<number | null>(null);
   protected readonly fAnioError = signal(false);
   protected readonly fMesError = signal(false);
-  protected readonly fStateDownload = signal(false);
 
   // PDF abierto en el visor; null = modal cerrado.
   protected readonly viewerDoc = signal<ArrayBuffer | null>(null);
@@ -59,6 +58,17 @@ export class EeccListComponent {
 
   private readonly queryParams = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly filter = computed(() => parseFilter(this.queryParams()));
+
+  // Descargar: solo con resultados de la busqueda ya cargados (CA01 / CA05). Mes y
+  // año son obligatorios: el listado del backend solo devuelve filas con ambos.
+  protected readonly downloading = signal(false);
+  protected readonly canDownload = computed(
+    () =>
+      !this.store.isLoading() &&
+      this.store.total() > 0 &&
+      !!this.filter().closingMonth &&
+      !!this.filter().closingYear,
+  );
 
   constructor() {
     // Los filtros arrancan con la busqueda de la URL (recarga, volver atras, enlace compartido).
@@ -94,10 +104,28 @@ export class EeccListComponent {
     });
 
     // La URL manda: la busqueda dispara la carga. Ver documento de arquitectura 6.2.
+    // Solo depende del filtro: leer aqui el estado del store repetia la busqueda al llegar la respuesta.
     effect(() => {
       void this.store.load(this.filter());
-      this.fStateDownload.set(this.store.total() > 0);
     });
+  }
+
+  /**
+   * Excel con todos los registros de la ultima busqueda: usa el filtro de la URL,
+   * no lo que este seleccionado en los combos sin haber presionado Buscar (CA03).
+   */
+  protected async descargar(): Promise<void> {
+    if (!this.canDownload() || this.downloading()) return;
+    const filter = this.filter();
+    this.docNotice.set(null);
+    this.downloading.set(true);
+    try {
+      saveFile(await this.api.export(filter), exportFileName(filter));
+    } catch (e: unknown) {
+      this.docNotice.set(exportErrorMessage(e));
+    } finally {
+      this.downloading.set(false);
+    }
   }
 
   /** Si el API falla se usa el año actual y los 12 meses, para no bloquear la busqueda. */
@@ -216,6 +244,33 @@ export function parseFilter(pm: ParamMap): EeccFilter {
     ...(month >= 1 && month <= 12 ? { closingMonth: month } : {}),
     ...(year > 0 ? { closingYear: year } : {}),
   };
+}
+
+/** Control_Envio_EECC_AAAAMM[_poliza].xlsx: mismo nombre que arma el backend. */
+export function exportFileName(f: EeccFilter): string {
+  const month = String(f.closingMonth ?? '').padStart(2, '0');
+  const policy = f.policyNumber ? `_${f.policyNumber}` : '';
+  return `Control_Envio_EECC_${f.closingYear ?? ''}${month}${policy}.xlsx`;
+}
+
+export function exportErrorMessage(e: unknown): string {
+  if (isAppError(e) && e.kind === 'notfound') {
+    return 'No hay registros para descargar con los filtros aplicados.';
+  }
+  if (isAppError(e) && e.kind === 'input') {
+    return 'La consulta supera el maximo de registros permitidos para la descarga. Afine los filtros de busqueda.';
+  }
+  return isAppError(e) ? e.message : 'No se pudo generar el archivo de descarga.';
+}
+
+/** Descarga el archivo en el navegador sin abrir otra pestaña. */
+function saveFile(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 

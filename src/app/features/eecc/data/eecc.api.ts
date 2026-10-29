@@ -17,6 +17,7 @@ export class EeccApi {
   private readonly base = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/GetMonitoringEeccData`;
   private readonly documentUrl = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/GetMonitoringEeccDocument`;
   private readonly periodsUrl = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/GetMonitoringEeccPeriods`;
+  private readonly exportUrl = `${this.config.apiBaseUrlVigpCore}/monitoringEecc/ExportMonitoringEeccData`;
 
   async search(filter: EeccFilter): Promise<SearchResult> {
     // SOLO DESARROLLO: datos falsos sin backend. Ver dev-mock.ts.
@@ -32,6 +33,20 @@ export class EeccApi {
     const dto = await firstValueFrom(this.http.get<EeccSearchDto>(this.base, { params }));
     return toSearchResult(dto, filter);
 
+  }
+
+  /**
+   * Excel con TODOS los registros de la busqueda (no solo la pagina visible).
+   * Sin Page/PageSize: el backend exporta el total del paginado.
+   * Rechaza con AppError 'notfound' sin registros e 'input' si supera el maximo.
+   */
+  async export(filter: EeccFilter): Promise<Blob> {
+    let params = new HttpParams();
+    if (filter.policyNumber) params = params.set('PolicyNumber', filter.policyNumber);
+    if (filter.closingMonth) params = params.set('ClosingPeriodMonth', filter.closingMonth);
+    if (filter.closingYear) params = params.set('ClosingPeriodYear', filter.closingYear);
+
+    return firstValueFrom(this.http.get(this.exportUrl, { params, responseType: 'blob' }));
   }
 
   /** Opciones de los filtros Año y Mes de Cierre (años desde la primera poliza VIGP). */

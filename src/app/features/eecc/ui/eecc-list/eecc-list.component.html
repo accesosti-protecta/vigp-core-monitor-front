@@ -1,13 +1,18 @@
 <div class="head">
   <h1 tabindex="-1" class="title">Control de Envio de EECC</h1>
-  <!-- Descargar: en el mockup pero fuera del alcance aprobado (propuesta funcional 2.5).
-       Se deja visible e inhabilitado hasta resolver la contradiccion. -->
-  <button type="button" class="btn-descargar" [disabled]="!fStateDownload()" title="Descargar">
+  <!-- Descargar: Excel con todos los registros de la busqueda; inhabilitado sin resultados (CA01 / CA05). -->
+  <button type="button" class="btn-descargar" [disabled]="!canDownload() || downloading()"
+    [attr.aria-busy]="downloading()" title="Descargar" (click)="descargar()">
+    @if (downloading()) {
+    <span class="btn-descargar__spinner" aria-hidden="true"></span>
+    Descargando...
+    } @else {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="btn-descargar__icon"
       aria-hidden="true">
       <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
     </svg>
     Descargar
+    }
   </button>
 </div>
 
