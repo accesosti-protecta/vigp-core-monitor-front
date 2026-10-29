@@ -14,6 +14,7 @@ import { EeccId, EeccRow, hasDocument } from '../../domain/eecc-row.model';
 import { isAppError } from '@core/errors/app-error';
 import { EeccStore } from '../../eecc.store';
 import { EeccPdfViewerComponent } from '../eecc-pdf-viewer/eecc-pdf-viewer.component';
+import { SessionService } from '@core/auth/session.service';
 
 @Component({
   selector: 'app-eecc-list',
@@ -33,6 +34,7 @@ export class EeccListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(EeccApi);
+  private readonly session = inject(SessionService);
   protected readonly store = inject(EeccStore);
 
   protected readonly hasDocument = hasDocument;
@@ -84,8 +86,9 @@ export class EeccListComponent {
       const firstname = params.get('firstname');
       const lastname = params.get('lastname');
 
-      if (firstname) sessionStorage.setItem('firstname', firstname);
-      if (lastname) sessionStorage.setItem('lastname', lastname);
+      if (firstname || lastname) {
+        this.session.setClientName(firstname ?? '', lastname ?? '');
+      }
 
       // Si llegaron en la URL, los quitamos sin dejar rastro en el historial.
       if (firstname || lastname) {

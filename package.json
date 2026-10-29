@@ -2,7 +2,7 @@
   "name": "protecta.eecc-consulta.frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Modulo de Consulta y Trazabilidad de EECC - VIGP",
+  "description": "Modulo de Consulta y Trazabilidad de procesos - VIGP",
   "engines": {
     "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
   },
@@ -11,7 +11,7 @@
     "start": "ng serve",
     "build": "ng build --configuration production",
     "build:dev": "ng build --configuration development",
-    "build:qas": "ng build --configuration production --base-href /eecc-consulta/ && node scripts/apply-config.mjs qas",
+    "build:qas": "ng build --configuration production --base-href /monitoreo-vigp/ && node scripts/apply-config.mjs qas",
     "build:prd": "ng build --configuration production && node scripts/apply-config.mjs prd",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
