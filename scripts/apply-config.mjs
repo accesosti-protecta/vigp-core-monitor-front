@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 
 const env = process.argv[2];
 const source = resolve(`deploy/config/app-config.${env}.json`);
-const target = resolve('dist/eecc-consulta/assets/config/app-config.json');
+const target = resolve('dist/monitoreo-vigp/assets/config/app-config.json');
 
 if (!env || !existsSync(source)) {
   console.error(`[apply-config] Ambiente no valido: "${env ?? ''}". Use: qas | prd`);
