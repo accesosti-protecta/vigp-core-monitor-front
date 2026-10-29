@@ -8,6 +8,11 @@
       @if (session.displayName(); as name) {
       <span class="hdr__user-name">{{ name }}</span>
       }
+      @if (clientName().firstname || clientName().lastname) {
+      <span class="hdr__client-name">
+        {{ clientName().firstname }} {{ clientName().lastname }}
+      </span>
+      }
       <!-- Navegacion al sistema de origen -->
       <a class="hdr__back" [href]="returnUrl">Volver a Plataforma Digital</a>
     </div>
