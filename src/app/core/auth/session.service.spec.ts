@@ -42,6 +42,18 @@ describe('SessionService', () => {
     expect(window.location.search).not.toContain('nombre=Juan');
   });
 
+  it('debe capturar firstname y lastname desde la URL y guardarlos para el cliente', () => {
+    window.history.replaceState({}, '', '/eecc-consulta?firstname=OPERACIONES&lastname=OPERACIONES');
+
+    service.init();
+
+    expect(service.clientFirstname()).toBe('OPERACIONES');
+    expect(service.clientLastname()).toBe('OPERACIONES');
+    expect(sessionStorage.getItem('firstname')).toBe('OPERACIONES');
+    expect(sessionStorage.getItem('lastname')).toBe('OPERACIONES');
+    expect(window.location.search).toBe('');
+  });
+
   it('debe recuperar el usuario desde sessionStorage si no viene en la URL', () => {
     sessionStorage.setItem('vigp_user_name', 'Maria Garcia');
     window.history.replaceState({}, '', '/');
